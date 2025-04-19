@@ -7,7 +7,7 @@ import GPUtil
 import threading
 import locale
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 from collections import deque
@@ -22,7 +22,9 @@ IDIOMAS = {
         "cpu": "CPU",
         "gpu": "GPU",
         "memory": "Memória",
-        "language": "Idioma"
+        "language": "Idioma",
+        "kill": "Matar Tarefa",
+        "confirm_kill": "Deseja encerrar esta tarefa?"
     },
     "en": {
         "net": "Network",
@@ -32,7 +34,9 @@ IDIOMAS = {
         "cpu": "CPU",
         "gpu": "GPU",
         "memory": "Memory",
-        "language": "Language"
+        "language": "Language",
+        "kill": "Kill Task",
+        "confirm_kill": "Do you want to kill this task?"
     }
 }
 
@@ -42,11 +46,11 @@ def traduzir(chave):
     return IDIOMAS[lang].get(chave, chave)
 
 # Criando janela principal
-ctk.set_appearance_mode("System")
-ctk.set_default_color_theme("blue")
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("dark-blue")
 app = ctk.CTk()
 app.title("Gerenciador de Tarefas")
-app.geometry("1200x800")
+app.geometry("1250x850")
 
 # Função para atualizar o idioma
 def trocar_idioma(event):
@@ -60,9 +64,10 @@ def atualizar_rotulos():
     dash_title.configure(text=traduzir("dashboard"))
     compare_title.configure(text=traduzir("compare"))
     language_label.configure(text=traduzir("language"))
+    kill_button.configure(text=traduzir("kill"))
 
 # Frame de Redes
-net_frame = ctk.CTkFrame(app)
+net_frame = ctk.CTkFrame(app, corner_radius=15)
 net_frame.place(relx=0.02, rely=0.05, relwidth=0.45, relheight=0.2)
 
 net_title = ctk.CTkLabel(net_frame, text="", font=ctk.CTkFont(weight="bold", size=16))
@@ -72,18 +77,35 @@ net_label = ctk.CTkLabel(net_frame, text="")
 net_label.pack(padx=10, pady=10)
 
 # Frame de Tarefas
-task_frame = ctk.CTkFrame(app)
-task_frame.place(relx=0.02, rely=0.28, relwidth=0.45, relheight=0.35)
+task_frame = ctk.CTkFrame(app, corner_radius=15)
+task_frame.place(relx=0.02, rely=0.28, relwidth=0.45, relheight=0.4)
 
 task_title = ctk.CTkLabel(task_frame, text="", font=ctk.CTkFont(weight="bold", size=16))
 task_title.pack(anchor="w", padx=10, pady=5)
 
-task_listbox = tk.Listbox(task_frame)
+task_listbox = tk.Listbox(task_frame, font=("Consolas", 10))
 task_listbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
+# Botão de matar tarefa
+kill_button = ctk.CTkButton(task_frame, text="", command=lambda: matar_tarefa())
+kill_button.pack(pady=5)
+
+def matar_tarefa():
+    selected = task_listbox.curselection()
+    if selected:
+        pid_nome = task_listbox.get(selected[0])
+        pid = int(pid_nome.split(' - ')[0])
+        confirm = messagebox.askyesno("Confirm", traduzir("confirm_kill"))
+        if confirm:
+            try:
+                p = psutil.Process(pid)
+                p.terminate()
+            except Exception as e:
+                messagebox.showerror("Erro", str(e))
+
 # Frame de Dashboard
-dash_frame = ctk.CTkFrame(app)
-dash_frame.place(relx=0.5, rely=0.05, relwidth=0.45, relheight=0.3)
+dash_frame = ctk.CTkFrame(app, corner_radius=15)
+dash_frame.place(relx=0.5, rely=0.05, relwidth=0.45, relheight=0.25)
 
 dash_title = ctk.CTkLabel(dash_frame, text="", font=ctk.CTkFont(weight="bold", size=16))
 dash_title.pack(anchor="w", padx=10, pady=5)
@@ -92,8 +114,8 @@ dash_label = ctk.CTkLabel(dash_frame, text="")
 dash_label.pack(padx=10, pady=10)
 
 # Frame de Comparativo
-compare_frame = ctk.CTkFrame(app)
-compare_frame.place(relx=0.5, rely=0.38, relwidth=0.45, relheight=0.3)
+compare_frame = ctk.CTkFrame(app, corner_radius=15)
+compare_frame.place(relx=0.5, rely=0.32, relwidth=0.45, relheight=0.25)
 
 compare_title = ctk.CTkLabel(compare_frame, text="", font=ctk.CTkFont(weight="bold", size=16))
 compare_title.pack(anchor="w", padx=10, pady=5)
@@ -104,10 +126,10 @@ compare_label.pack(padx=10, pady=10)
 # Dropdown para idioma
 lang_var = tk.StringVar(value=lang)
 language_label = ctk.CTkLabel(app, text="")
-language_label.place(relx=0.02, rely=0.65)
+language_label.place(relx=0.02, rely=0.7)
 
 lang_menu = ttk.Combobox(app, textvariable=lang_var, values=["pt", "en"])
-lang_menu.place(relx=0.02, rely=0.69, width=100)
+lang_menu.place(relx=0.02, rely=0.74, width=100)
 lang_menu.bind("<<ComboboxSelected>>", trocar_idioma)
 
 # Histórico para os gráficos
@@ -116,8 +138,8 @@ cpu_hist = deque([0]*data_len, maxlen=data_len)
 memory_hist = deque([0]*data_len, maxlen=data_len)
 
 # Frame com gráfico
-graph_frame = ctk.CTkFrame(app)
-graph_frame.place(relx=0.02, rely=0.75, relwidth=0.93, relheight=0.2)
+graph_frame = ctk.CTkFrame(app, corner_radius=15)
+graph_frame.place(relx=0.02, rely=0.8, relwidth=0.93, relheight=0.18)
 
 fig, ax = plt.subplots(figsize=(8,2.5))
 line_cpu, = ax.plot(cpu_hist, label="CPU")
