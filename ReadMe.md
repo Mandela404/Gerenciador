@@ -39,7 +39,7 @@ As dependências estão listadas no `requirements.txt`, mas resumidamente:
 
 - `customtkinter`: UI moderna
 - `psutil`: acesso a informações do sistema
-- `GPUtil`: leitura de dados da GPU (NVIDIA)
+- `GPUtil`: leitura de dados da GPU (NVIDIA) (Ainda nao consegui dar duporte a Placas AMD, caso saiba como, comente por favor)
 - `matplotlib`: renderização de gráficos
 
 ---
@@ -47,7 +47,7 @@ As dependências estão listadas no `requirements.txt`, mas resumidamente:
 ---
 
 ## Autor
-**Seu Nome ou GitHub**
+**Mandela 404**
 
 Sinta-se livre para contribuir com melhorias!
 
