@@ -44,9 +44,6 @@ As dependências estão listadas no `requirements.txt`, mas resumidamente:
 
 ---
 
-## Screenshots (opcional)
-Adicione aqui capturas de tela se desejar demonstrar o visual da interface.
-
 ---
 
 ## Autor
